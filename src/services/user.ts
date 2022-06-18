@@ -25,8 +25,10 @@ const findUserById = (id: string) => {
     }
 }
 
-export const getUsers = async (params: QueryParameters): Promise<IResponse> => {
-    if (params.id) {
+export const getUsers = async (
+    params?: QueryParameters
+): Promise<IResponse> => {
+    if (params && params.id) {
         const user = findUserById(params.id)
         if (user) {
             return formatJSONResponse({ users: user }, 200)
@@ -74,7 +76,7 @@ export const updateUser = async (
 ) => {
     const { id } = params
     if (!validateUuid(<string>id)) {
-        return formatJSONResponse({ errorMessage: 'UserId is not valid' }, 400)
+        return formatJSONResponse({ message: 'UserId is not valid' }, 400)
     }
     if (id) {
         const currentUser = findUserById(id)
@@ -101,14 +103,14 @@ export const updateUser = async (
                 200
             )
         } else {
-            return formatJSONResponse({ errorMessage: 'User not found' }, 404)
+            return formatJSONResponse({ message: 'User not found' }, 404)
         }
     }
 }
 export const deleteUser = async (params: QueryParameters) => {
     const { id } = params
     if (!validateUuid(<string>id)) {
-        return formatJSONResponse({ errorMessage: 'UserId is not valid' }, 400)
+        return formatJSONResponse({ message: 'UserId is not valid' }, 400)
     }
     if (id) {
         const user = findUserById(id)

@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": "123",
+      "name": "Jamie",
+      "age": 25,
+      "hobby": ["football"]
+    },
+    {
+      "id": "111",
+      "name": "Sam",
+      "age": 30,
+      "hobby": ["football, basketball"]
+    }
+  ]
+}

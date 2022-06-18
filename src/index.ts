@@ -8,7 +8,7 @@ import cluster from 'cluster'
 
 const envPort = process.env.PORT as unknown as number
 const port: number = envPort || 3001
-const host = process.env.HOST || 'localhost'
+const host: string = process.env.HOST || 'localhost'
 
 const getCpus = () => {
     return cpus().length
@@ -34,9 +34,9 @@ const handleRequest = async (
 ): Promise<IResponse | undefined> => {
     const route = request.url
     // TODO refactor!!!!!!!
-    if (!route.includes('/api/user')) {
-        return formatJSONResponse({ message: 'Route does not exist' }, 404)
-    }
+    // if (!route.includes('/api/user')) {
+    //     return formatJSONResponse({ message: 'Route does not exist' }, 404)
+    // }
     //
     const query = url.parse(request.url, true).query as QueryParameters
     const params: QueryParameters = { id: null }
@@ -64,7 +64,7 @@ const handleRequest = async (
     }
 }
 
-const server = createServer()
+export const server = createServer()
 server.on(
     'request',
     async (request: Request, response: ServerResponse): Promise<void> => {
