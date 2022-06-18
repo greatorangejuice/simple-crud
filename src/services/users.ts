@@ -118,7 +118,6 @@ export const deleteUser = async (params: QueryParameters) => {
             state = state.filter((user) => {
                 return user.id !== id
             })
-            console.log(state)
             return formatJSONResponse(
                 { message: 'User successfully deleted' },
                 204

@@ -1,8 +1,6 @@
 import request from 'supertest'
 import { server } from '../src'
-import { getUsers, updateUser } from '../src/services/user'
-import { QueryParameters } from '../src/models/model'
-import { jest } from '@jest/globals'
+import { getUsers } from '../src/services/users'
 
 describe('API tests', () => {
     describe('Suite 1', () => {
@@ -60,18 +58,15 @@ describe('API tests', () => {
             expect(response.statusCode).toBe(201)
             expect(message).toBe('User created successfully')
         })
-        it("\x1b[36mUpdate user\x1b[0m // Should return 200 and 'User created successfully'", async () => {
-            const response = await request(server)
-                .put('/api/users')
-                .send({ name: 'Jack', age: 20, hobby: ['hacking'] })
-            // @ts-ignore
-            jest.mock(getUsers())
-            const test = await getUsers().then(() => {
-                console.log('test?')
-            })
-            const message = JSON.parse(response.text).message
-            expect(response.statusCode).toBe(201)
-            expect(message).toBe('User created successfully')
-        })
+        // it("\x1b[36mUpdate user\x1b[0m // Should return 200 and 'User created successfully'", async () => {
+        //     const response = await request(server)
+        //         .put('/api/users')
+        //         .send({ name: 'Jack', age: 20, hobby: ['hacking'] })
+        //     const message = JSON.parse(response.text).message
+        //     const t = await getUsers()
+        //
+        //     expect(response.statusCode).toBe(201)
+        //     expect(message).toBe('User created successfully')
+        // })
     })
 })

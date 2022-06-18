@@ -1,8 +1,5 @@
-import { createServer, IncomingMessage, ServerResponse } from 'http'
-import { createUser, deleteUser, getUsers, updateUser } from './services/user'
-import { IResponse, QueryParameters, User } from './models/model'
-import url from 'url'
-import { formatJSONResponse } from './utils'
+import { createServer } from 'http'
+import { router } from './router'
 import { cpus } from 'os'
 import cluster from 'cluster'
 
@@ -10,78 +7,28 @@ const envPort = process.env.PORT as unknown as number
 const port: number = envPort || 3001
 const host: string = process.env.HOST || 'localhost'
 
-const getCpus = () => {
-    return cpus().length
-}
+if (process.env.CLUSTER === 'ON') {
+    const numCPUs = cpus().length
 
-export const getRequestData = (
-    request: IncomingMessage
-): Promise<Omit<User, 'id'>> => {
-    request.setEncoding('utf8')
-    return new Promise((resolve) => {
-        let body = ''
-        request.on('data', (chunk: Buffer) => {
-            body += chunk
+    if (cluster.isPrimary) {
+        console.log(`Primary ${process.pid} is running`)
+        for (let i = 0; i < numCPUs; i++) {
+            cluster.fork()
+        }
+
+        cluster.on('exit', (worker, code, signal) => {
+            console.log(`worker ${worker.process.pid} died`)
         })
-        request.on('end', () => {
-            resolve(JSON.parse(body))
+    } else {
+        const server = createServer().listen(port, host, (): void => {
+            console.log(`Server is running on ${host}:${port}`)
         })
+        server.on('request', router)
+        console.log(`Worker ${process.pid} started`)
+    }
+} else {
+    const server = createServer().listen(port, host, (): void => {
+        console.log(`Server is running on ${host}:${port}`)
     })
+    server.on('request', router)
 }
-
-const handleRequest = async (
-    request: Request
-): Promise<IResponse | undefined> => {
-    const route = request.url
-    // TODO refactor!!!!!!!
-    // if (!route.includes('/api/user')) {
-    //     return formatJSONResponse({ message: 'Route does not exist' }, 404)
-    // }
-    //
-    const query = url.parse(request.url, true).query as QueryParameters
-    const params: QueryParameters = { id: null }
-    if (query) {
-        params.id = query.id
-    }
-    let body
-    try {
-        switch (request.method) {
-            case 'GET':
-                return await getUsers(params)
-            case 'POST':
-                // @ts-ignore
-                body = await getRequestData(request)
-                return await createUser(body)
-            case 'PUT':
-                // @ts-ignore
-                body = await getRequestData(request)
-                return await updateUser(params, body)
-            case 'DELETE':
-                return await deleteUser(params)
-        }
-    } catch (errorMessage) {
-        return formatJSONResponse({ message: 'Unhandled error' }, 500)
-    }
-}
-
-export const server = createServer()
-server.on(
-    'request',
-    async (request: Request, response: ServerResponse): Promise<void> => {
-        try {
-            const data = await handleRequest(request)
-            if (data) {
-                const { headers, body, statusCode } = data
-                response.writeHead(statusCode, '', headers)
-                response.write(body)
-                response.end()
-            }
-        } catch (e) {
-            //TODO add handler
-            throw new Error()
-        }
-    }
-)
-server.listen(port, host, (): void => {
-    console.log(`Server is running on ${host}:${port}`)
-})
