@@ -3,9 +3,16 @@ import { createUser, deleteUser, getUsers, updateUser } from './services/user'
 import { IResponse, QueryParameters, User } from './models/model'
 import url from 'url'
 import { formatJSONResponse } from './utils'
+import { cpus } from 'os'
+import cluster from 'cluster'
 
-const port = 3000
-const host = 'localhost'
+const envPort = process.env.PORT as unknown as number
+const port: number = envPort || 3001
+const host = process.env.HOST || 'localhost'
+
+const getCpus = () => {
+    return cpus().length
+}
 
 export const getRequestData = (
     request: IncomingMessage
@@ -25,6 +32,12 @@ export const getRequestData = (
 const handleRequest = async (
     request: Request
 ): Promise<IResponse | undefined> => {
+    const route = request.url
+    // TODO refactor!!!!!!!
+    if (!route.includes('/api/user')) {
+        return formatJSONResponse({ message: 'Route does not exist' }, 404)
+    }
+    //
     const query = url.parse(request.url, true).query as QueryParameters
     const params: QueryParameters = { id: null }
     if (query) {

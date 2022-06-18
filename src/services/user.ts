@@ -105,7 +105,6 @@ export const updateUser = async (
         }
     }
 }
-
 export const deleteUser = async (params: QueryParameters) => {
     const { id } = params
     if (!validateUuid(<string>id)) {
