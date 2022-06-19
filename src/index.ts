@@ -1,19 +1,14 @@
-import {createServer} from 'http';
+import { createServer } from 'http'
+import { router } from './router'
+import { DB } from './db'
 
-const port = 3000;
-const host = 'localhost';
+const envPort = process.env.PORT as unknown as number
+const port: number = envPort || 3001
+const host: string = process.env.HOST || 'localhost'
 
-const server = createServer((req, res) => {
-    console.log(req.method);
-    console.log(req.url)
-    switch (req.method) {
-        case 'GET':
-            res.statusCode = 200;
-            res.write(JSON.stringify({text: '1', name: 'Jack'}))
-            res.end();
-    }
-});
-
-server.listen(port, host, () => {
+export const server = createServer().listen(port, host, (): void => {
     console.log(`Server is running on ${host}:${port}`)
 })
+server.on('request', router)
+
+export const database = new DB()
