@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "start:dev": "cross-env NODE_ENV=development webpack --watch",
-    "start:prod": "cross-env NODE_ENV=production webpack && node .dist/main.bundle.js",
+    "start:prod": "cross-env NODE_ENV=production webpack && node dist/main.bundle.js",
     "start:multi": "cross-env NODE_ENV=development CLUSTER=ON webpack --watch"
   },
   "keywords": [],

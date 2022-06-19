@@ -8,7 +8,10 @@ module.exports = {
     context: __dirname,
     mode: process.env.NODE_ENV,
     entry: {
-        main: path.resolve(__dirname, './src/index.ts'),
+        main: path.resolve(
+            __dirname,
+            process.env.CLUSTER === 'ON' ? './src/cluster.ts' : './src/index.ts'
+        ),
     },
     resolve: {
         extensions: ['.json', '.ts'],
@@ -17,7 +20,7 @@ module.exports = {
         plugins: [],
     },
     output: {
-        path: path.resolve(__dirname, '.dist'),
+        path: path.resolve(__dirname, 'dist'),
         filename: '[name].bundle.js',
     },
     optimization: {
@@ -33,7 +36,7 @@ module.exports = {
                 exclude: [
                     [
                         path.resolve(__dirname, 'node_modules'),
-                        path.resolve(__dirname, '.dist'),
+                        path.resolve(__dirname, 'dist'),
                     ],
                 ],
                 options: {
@@ -44,7 +47,7 @@ module.exports = {
         ],
     },
     plugins: [
-        new NodemonPlugin(),
+        new NodemonPlugin({ script: 'dist/main.bundle.js' }),
         new DefinePlugin({
             'process.env': JSON.stringify(dotenv.config().parsed),
         }),

@@ -14,7 +14,6 @@ export const router = async (
             response.end()
         }
     } catch (e) {
-        //TODO add handler
         throw new Error()
     }
 }

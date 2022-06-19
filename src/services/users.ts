@@ -1,42 +1,21 @@
 import { formatJSONResponse } from '../utils'
 import { IResponse, QueryParameters, User } from '../models/model'
 import { v4 as uuid, validate as validateUuid } from 'uuid'
-
-let state: User[] = [
-    {
-        id: '123',
-        name: 'Jamie',
-        age: 25,
-        hobby: ['football'],
-    },
-    {
-        id: '111',
-        name: 'Sam',
-        age: 30,
-        hobby: ['football, basketball'],
-    },
-]
-
-const findUserById = (id: string) => {
-    if (id) {
-        return state.find((user) => {
-            return user.id === id
-        })
-    }
-}
+import { database } from '../index'
 
 export const getUsers = async (
     params?: QueryParameters
 ): Promise<IResponse> => {
     if (params && params.id) {
-        const user = findUserById(params.id)
+        const user = await database.findUserById(params.id)
         if (user) {
             return formatJSONResponse({ users: user }, 200)
         } else {
             return formatJSONResponse({ message: 'User not found' }, 400)
         }
     } else {
-        return formatJSONResponse({ users: state }, 200)
+        const users = await database.getAllUsers()
+        return formatJSONResponse({ users }, 200)
     }
 }
 
@@ -58,9 +37,8 @@ export const createUser = async (
                 )
             }
         }
-
         user.id = id
-        state.push(user)
+        await database.addUser(user)
         return formatJSONResponse(
             { message: 'User created successfully', users: user },
             201
@@ -79,7 +57,7 @@ export const updateUser = async (
         return formatJSONResponse({ message: 'UserId is not valid' }, 400)
     }
     if (id) {
-        const currentUser = findUserById(id)
+        const currentUser = await database.findUserById(id)
         if (currentUser) {
             const { name, age, hobby } = data
             const user = new User(name, age, hobby, id)
@@ -94,10 +72,7 @@ export const updateUser = async (
                     )
                 }
             }
-            const index = state.findIndex((user) => {
-                return user.id === id
-            })
-            state[index] = user
+            await database.updateUser(user)
             return formatJSONResponse(
                 { message: 'User successfully updated', users: user },
                 200
@@ -113,11 +88,9 @@ export const deleteUser = async (params: QueryParameters) => {
         return formatJSONResponse({ message: 'UserId is not valid' }, 400)
     }
     if (id) {
-        const user = findUserById(id)
+        const user = await database.findUserById(id)
         if (user) {
-            state = state.filter((user) => {
-                return user.id !== id
-            })
+            await database.deleteUser(user)
             return formatJSONResponse(
                 { message: 'User successfully deleted' },
                 204
